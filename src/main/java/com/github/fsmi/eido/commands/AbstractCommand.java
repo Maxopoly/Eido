@@ -2,17 +2,18 @@ package com.github.fsmi.eido.commands;
 
 import java.util.Arrays;
 import java.util.Collections;
+import java.util.LinkedList;
 import java.util.List;
 
 public abstract class AbstractCommand {
 
 	private final List<String> identifier;
 
-	public AbstractCommand(String... identifiers) {
-		if (identifiers.length == 0) {
-			throw new IllegalArgumentException("Can not create command without identifiers");
-		}
-		this.identifier = Collections.unmodifiableList(Arrays.asList(identifiers));
+	public AbstractCommand(String id, String... identifiers) {
+		//having a single string here at the start enforces at least one to be given at compile time
+		List <String> tempList = new LinkedList<>(Arrays.asList(identifiers));
+		tempList.add(id);
+		this.identifier = Collections.unmodifiableList(tempList);
 	}
 
 	/**

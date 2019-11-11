@@ -5,3 +5,6 @@ logs/
 .project
 .idea
 *.iml
+webcache/
+config.json
+temp/

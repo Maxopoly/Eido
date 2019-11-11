@@ -9,6 +9,7 @@ import java.util.Scanner;
 import org.apache.logging.log4j.Logger;
 
 import com.github.fsmi.eido.commands.AbstractCommand;
+import com.github.fsmi.eido.commands.StopCommand;
 
 public class CommandHandler {
 
@@ -32,6 +33,7 @@ public class CommandHandler {
 			logger.warn("System console not detected, using scanner as fallback behavior");
 			scanner = new Scanner(System.in);
 		}
+		logger.info("Ready to accept input from console");
 		while (reading) {
 			String msg;
 			if (c == null) {
@@ -44,7 +46,9 @@ public class CommandHandler {
 			}
 			logger.info("Console ran command: " + msg);
 			String reply = handleMsg(msg);
-			logger.info(reply);
+			if (reply != null && reply.length() > 0) {
+				logger.info(reply);
+			}
 		}
 		if (scanner != null) {
 			scanner.close();
@@ -68,8 +72,15 @@ public class CommandHandler {
 		return command.handle(Arrays.copyOfRange(splitArgs, 1, splitArgs.length));
 	}
 
+	private void registerCommand(AbstractCommand command) {
+		for (String id : command.getIdentifiers()) {
+			commands.put(id, command);
+		}
+	}
+
 	private void registerCommands() {
 		commands = new HashMap<>();
+		registerCommand(new StopCommand());
 	}
 
 }

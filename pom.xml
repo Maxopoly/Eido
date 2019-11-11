@@ -6,7 +6,7 @@
 	<groupId>com.github.fsmi</groupId>
 	<artifactId>eido</artifactId>
 	<version>0.0.1-SNAPSHOT</version>
-	<packaging>war</packaging>
+	<packaging>jar</packaging>
 
 	<name>Eido</name>
 	<url>https://github.com/maxopoly/eido</url>
@@ -14,8 +14,8 @@
 	<properties>
 		<project.build.sourceEncoding>UTF-8</project.build.sourceEncoding>
 	</properties>
-	
-		<build>
+
+	<build>
 		<plugins>
 			<plugin>
 				<groupId>org.apache.maven.plugins</groupId>
@@ -48,7 +48,7 @@
 					<archive>
 						<manifest>
 							<addClasspath>true</addClasspath>
-							<mainClass>com.github.fsmi.eido.Main</mainClass>
+							<mainClass>com.github.fsmi.eido.EidoMain</mainClass>
 						</manifest>
 					</archive>
 				</configuration>
@@ -64,11 +64,15 @@
 			<version>4.12</version>
 			<scope>test</scope>
 		</dependency>
+		<!-- Upgrading Tomcat to 9.x currently does not work with our programmatic 
+			approach due to unknown reasons, tomcat would just hang during startup. Feel 
+			free to retest this later or find the actual underlying issue. -->
 		<dependency>
 			<groupId>org.apache.tomcat</groupId>
 			<artifactId>tomcat-catalina</artifactId>
-			<version>9.0.27</version>
+			<version>8.5.47</version>
 		</dependency>
+		<!-- No, we are not using the google one -->
 		<dependency>
 			<groupId>org.json</groupId>
 			<artifactId>json</artifactId>
@@ -94,6 +98,7 @@
 			<artifactId>log4j-api</artifactId>
 			<version>2.12.1</version>
 		</dependency>
+		<!-- Handles database connection pooling -->
 		<dependency>
 			<groupId>com.zaxxer</groupId>
 			<artifactId>HikariCP</artifactId>
