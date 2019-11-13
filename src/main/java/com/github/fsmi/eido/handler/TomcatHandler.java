@@ -87,7 +87,7 @@ public class TomcatHandler {
 			logger.error("Failed to deploy web files", e);
 			return false;
 		}
-		topContext = tomcat.addContext(topLevelPath, webCache.getAbsolutePath());
+		topContext = tomcat.addContext("", webCache.getAbsolutePath());
 		return true;
 	}
 

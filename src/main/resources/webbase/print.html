@@ -1,0 +1,56 @@
+<!-- template for the print widget. Data binding context: PrintJob -->
+<form data-bind="submit: function() { submit() }">
+  <table class="pull-right text-right">
+    <tr>
+      <td><label>Druckpreis:</label></td>
+      <td data-bind="price: printPrice / 100"></td>
+    </tr>
+    <tr>
+      <td>
+        <label for="deposit-count">Pfand: </label>
+      </td>
+      <td style="padding-left: 40px">
+        +&nbsp;
+        <input type="number" required min='0' id="deposit-count" class='number-input form-control-inline form-control' data-bind="value: depositCount">
+        &nbsp;×&nbsp;
+        <span data-bind="price: config.DEPOSIT_PRICE / 100"></span>
+      </td>
+    </tr>
+    <tr> <!-- sub-total -->
+      <td></td>
+      <td><hr></td>
+    </tr>
+    <tr>
+      <td></td>
+      <td data-bind="price: totalPrice / 100"></td>
+    </tr>
+  </table>
+
+  <div class="pull-right" style="clear: both; padding-top: 10px;">
+    <input type="text" id="cover-text" class='form-control-inline form-control' data-bind="value: cart.name" placeholder="Eindeutiger Bezeichner (Pfand/Deckblatt)" required style='vertical-align: middle;'>
+    <div class="btn-group">
+      <button type="submit" class='btn btn-primary icon-print' data-bind='enable: cart.documents.length > 0 && status != "waiting",
+      style: {
+        "background-image": status == "waiting" ? buttonGradient : null,
+        opacity: status == "waiting" ? 1 : null,
+      }'>Drucken</button>
+      <button type="button" class="btn btn-primary dropdown-toggle" data-toggle="dropdown" data-bind='enable: cart.documents.length > 0'>
+        <span class="caret"></span>
+        <span class="sr-only">Toggle Dropdown</span>
+      </button>
+      <ul class="dropdown-menu" role="menu">
+        <li data-bind="css: {'disabled': cart.name.length === 0 || cart.name.trim().length === 0}">
+          <a href='#' class='icon-floppy' data-bind='click: cart.name.length && cart.name.trim().length > 0 && cart.save.bind(cart)'>Speichern</a>
+        </li>
+      </ul>
+    </div>
+    auf
+    <span data-bind="visible: availablePrinters.length == 1, text: availablePrinters[0]"></span>
+    <select class="form-control form-control-inline btn btn-default" data-bind="visible: availablePrinters.length > 1, options: availablePrinters, value: selectedPrinter"></select>
+    <div class="form-control-inline icon-placeholder">
+      <div class="icon" data-bind="css: { 'spinner icon-spinner active': status === 'waiting',
+        'icon-ok text-success': status === 'success',
+        'icon-attention text-danger': status === 'error' }"></div>
+    </div>
+  </div>
+</form>

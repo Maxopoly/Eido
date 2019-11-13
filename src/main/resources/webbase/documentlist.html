@@ -1,0 +1,110 @@
+<table id="documentlist" class="table" style="min-width: 710px"><!-- sum of widths since col min-width is ignored -->
+  <colgroup>
+    <col style="width: 20px">
+    <col style="width: 35px">
+    <col style="width: 35px">
+    <col style="min-width: 110px">
+    <col style="width: 100px">
+    <col style="width: 90px">
+    <col style="width: 80px">
+    <col style="width: 120px">
+    <col style="width: 120px">
+  </colgroup>
+  <thead>
+    <tr class="text-nowrap">
+      <td class="td-compact">#</td>
+      <td colspan="2" class="td-compact" data-bind="foreach: documentTypes">
+        <div data-bind="visible: totalCount">
+          <input type="checkbox" data-bind="checked: selected, attr: {'id': 'showdoctype-' + name}"><label data-bind="attr: {'for': 'showdoctype-' + name}" style="font-weight: inherit;"><span data-bind="attr: {title: title}, html: icon"></span> <span data-bind="text: count + '/' + (totalCount === undefined ? '' : totalCount)"></span>
+        </div>
+      </td>
+      <td>Vorlesungen</td>
+      <td>Prüfer</td>
+      <td><sortable-column params="coll: coll, column: 'date', asc: false">Datum</sortable-column></td>
+      <td><sortable-column params="coll: coll, column: 'number_of_pages', asc: false">Seiten</sortable-column></td>
+      <td><sortable-column params="coll: coll, column: 'validation_time', asc: false">Einpflegedatum</sortable-column></td>
+      <td class="text-right td-compact"><button class='icon-button btn-info btn' title="Alle hinzufügen" data-bind="click: addAll.bind($data)">∀<span class='icon-basket small'></span></button></td>
+    </tr>
+  </thead>
+  <tbody>
+  <tr class="warning text-warning text-center" data-bind="visible: user.isAuthenticated && scrubDocuments && scrubbedDocuments.length < coll.items.length">
+    <td colspan="9">
+      Es gibt <span data-bind="text: (coll.items.length - scrubbedDocuments.length) + ' noch nicht überprüfte(s) Protokoll(e)'"></span>. <a href="#" data-bind="click: function() { scrubDocuments = false; }">Anzeigen</a>
+    </td>
+  </tr>
+  <!-- ko foreach: scrubbedDocuments -->
+  <tr class="list" data-bind="
+    css: { 'warning': !validated, 'row-disabled': $parent.cart.contains($data) },
+    event: { mouseenter: $parent.rangeSelect.onRowMouseOver.bind($parent.rangeSelect, $index) },
+    click: function() { $parent.rangeSelect.onClick($index); }">
+    <td class="rangeBar-td td-compact" data-bind="css: { 'rangeBar-selected label-info': $parent.rangeSelect.selectedBarVisible($index)}">
+      <span class="rangeBar-bound rangeBar-upper-bound icon-down-open" data-bind="visible: $parent.rangeSelect.upperBoundVisible($index)"></span>
+      <span class="row-disabled" data-bind="text: $index() + 1"></span>
+      <span class="rangeBar-bound rangeBar-lower-bound icon-up-open" data-bind="visible: $parent.rangeSelect.lowerBoundVisible($index)"></span>
+    </td>
+    <td class="td-compact" data-bind="with: $parent.documentTypeByName[documentType]">
+      <span data-bind="attr: {title: title}, html: icon"></span>
+    </td>
+    <td class="td-compact" data-bind="with: $parent.solutionTypeByName[solution]">
+      <span data-bind="attr: {title: title}, css: iconClass"></span>
+    </td>
+    <td>
+      <ul class="lecture-list-cell" data-bind="foreach: lectures">
+        <li data-bind="text: name"></li>
+      </ul>
+      <span class="document-comment" data-bind="text: comment"></span>
+    </td>
+
+    <td data-bind="text: examinantsText"></td>
+    <td class="text-nowrap" data-bind="date: date"></td>
+    <td data-bind="text: numberOfPages"></td>
+    <td class="text-nowrap" style="color: grey">
+      <div data-bind="visible: validated, date: validationTime"></div>
+      <div class="icon-attention text-center text-warning" data-bind="visible: !validated" title="Noch nicht überprüft"></div>
+    </td>
+    <td class="text-nowrap td-compact text-right">
+      <div class="btn-group" data-bind="
+        style: { visibility: $parent.rangeSelect.toggleButtonVisible($index) || store.config.IS_KIOSK ? 'visible' : 'hidden' },
+        ">
+        <button
+           class='icon-button btn-info btn btn-compact icon-basket'
+           data-bind="
+           click: $parent.addRange.bind($parent),
+           clickBubble: false,
+           enable: available && !$parent.cart.contains($data)">
+        </button>
+        <!-- ko if: $parent.user.isAuthenticated -->
+        <button
+           class='icon-button btn-info btn btn-compact icon-eye'
+           title="Vorschau"
+           data-bind="
+           click: function() { window.open(previewURL, '_blank') },
+           clickBubble: false,
+           enable: available,
+           "></button>
+        <button
+           class='icon-button btn-info btn btn-compact icon-edit'
+           title="Bearbeiten"
+           data-bind="
+           click: function() { window.open(editURL, '_blank') },
+           clickBubble: false,
+           if: $parent.user.isAuthenticated,
+           "></button>
+        <!-- /ko -->
+        <!-- ko if: store.config.IS_KIOSK -->
+        <button
+           class='icon-button btn-info btn btn-compact icon-eye'
+           title="Vorschau"
+           data-bind="
+           click: function() { window.open(PDFjsURL, '_blank') },
+           clickBubble: false,
+           enable: available,
+           "></button>
+        <!-- /ko -->
+      </div>
+    </td>
+  </tr>
+  <!-- /ko -->
+  </tbody>
+</table>
+<load-more params="coll: coll"></load-more>
