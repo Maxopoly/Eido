@@ -10,6 +10,8 @@ import org.apache.logging.log4j.Logger;
 import org.json.JSONException;
 import org.json.JSONObject;
 
+import com.github.fsmi.eido.database.DBConnection;
+
 public class EidoConfig {
 
 	private static final String CONFIG_PATH = "config.json";
@@ -21,13 +23,14 @@ public class EidoConfig {
 	private int httpPort;
 	private String httpHost;
 	private String topLevelPath;
+	private DBConnection fsmiDbConnection;
+	private DBConnection garfieldDbConnection;
 
 	public EidoConfig(Logger logger) {
 		this.logger = logger;
 		saveDefaultConfig();
 		if (!reloadConfig()) {
-			logger.error("Failed to read config, shutting down");
-			System.exit(1);
+			throw new IllegalArgumentException();
 		}
 	}
 
@@ -53,7 +56,17 @@ public class EidoConfig {
 		httpHost = httpSection.optString("host", "localhost");
 		topLevelPath = httpSection.optString("topLevelPath", "/eido/");
 		logger.info(String.format("Server location: %s:%d%s", httpHost, httpPort, topLevelPath));
+		JSONObject databaseJson = config.getJSONObject("datbases");
+		if (databaseJson == null) {
+			throw new IllegalArgumentException("No databases specified in config");
+		}
+		fsmiDbConnection = parseDatabase(config.getJSONObject("fsmi"),"fsmi");
+		garfieldDbConnection = parseDatabase(config.optJSONObject("garfield"), "garfield");
+		
+		
+		
 		logger.info("Successfully parsed entire config");
+		
 	}
 
 	private void saveDefaultConfig() {
@@ -88,6 +101,38 @@ public class EidoConfig {
 		}
 	}
 
+	private DBConnection parseDatabase(JSONObject json, String defaultDbName) {
+		if (json == null) {
+			throw new IllegalArgumentException(String.format("No database of type %s was specified", defaultDbName));
+		}
+		String user = json.optString("user", "postgres");
+		String password = json.optString("password", null);
+		String host = json.optString("host", "localhost");
+		int port = json.optInt("port", 5433);
+		int poolSize = json.optInt("poolSize", 30);
+		long connectionTimeout = json.optLong("connection_timeout", 10_000L);
+		long idleTimeout = json.optLong("idle_timeout", 600_000L);
+		long maxLifeTime = json.optLong("max_life_time", 900_000L);
+		String database = json.optString("database", defaultDbName);
+		DBConnection dbConnection = new DBConnection(logger, user, password, host, port, database, poolSize,
+				connectionTimeout, idleTimeout, maxLifeTime);
+		return dbConnection;
+	}
+	
+	/**
+	 * @return Database connection used for the general fsmi database
+	 */
+	public DBConnection getFsmiDBConnection() {
+		return fsmiDbConnection;
+	}
+	
+	/**
+	 * @return Database connection used for garfield and odie internals (documents etc.)
+	 */
+	public DBConnection getGarfieldDBConnection() {
+		return garfieldDbConnection;
+	}
+
 	/**
 	 * Various debug things will automatically be enabled in non-production mode
 	 * 
@@ -110,7 +155,7 @@ public class EidoConfig {
 	public String getHttpHost() {
 		return httpHost;
 	}
-	
+
 	/**
 	 * @return URL location to run under
 	 */
