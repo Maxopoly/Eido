@@ -78,6 +78,9 @@ public final class DBMigration {
 
 	private DBMigration(DBConnection db, int id, Callable<Boolean> executable, String[] queries) {
 		Guard.nullCheck(db);
+		if (id <= 0) {
+			throw new IllegalArgumentException("Migration id must be bigger than 0");
+		}
 		this.db = db;
 		this.id = id;
 		this.executable = executable;

@@ -24,7 +24,7 @@ public class DBMigrationHandler {
 		Guard.nullCheck(db, logger);
 		this.db = db;
 		// we use a treeset, because iterating over it will always be in ascending key
-		// order
+		// order, which we define through the compareTo() method of DBMigration
 		this.migrations = new TreeSet<>();
 	}
 
@@ -68,8 +68,20 @@ public class DBMigrationHandler {
 				logger.error(String.format("Failed to execute migration %s", migration));
 				return false;
 			}
+			currentVersion = migration.getID();
+			insertUpdateExecuted(currentVersion);
 		}
 		return true;
+	}
+
+	private void insertUpdateExecuted(int id) {
+		try (Connection conn = db.getConnection();
+				PreparedStatement ps = conn.prepareStatement("insert into eido_version (id) values(?);")) {
+			ps.setInt(1, id);
+			ps.execute();
+		} catch (SQLException e) {
+			logger.error("Failed to insert executed database update", e);
+		}
 	}
 
 	void registerMigration(DBMigration migration) {
