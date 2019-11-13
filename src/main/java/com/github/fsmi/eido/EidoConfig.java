@@ -56,7 +56,7 @@ public class EidoConfig {
 		httpHost = httpSection.optString("host", "localhost");
 		topLevelPath = httpSection.optString("topLevelPath", "/eido/");
 		logger.info(String.format("Server location: %s:%d%s", httpHost, httpPort, topLevelPath));
-		JSONObject databaseJson = config.getJSONObject("datbases");
+		JSONObject databaseJson = config.getJSONObject("databases");
 		if (databaseJson == null) {
 			throw new IllegalArgumentException("No databases specified in config");
 		}

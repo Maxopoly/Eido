@@ -1,0 +1,31 @@
+{
+	"production": false,
+	"http": {
+		"port": 8080,
+		"host": "localhost",
+		"topLevelPath": "/eido/"
+	},
+	"databases": {
+		"fsmi": {
+			"database":"fsmi", 
+			"user":"postgres",
+			"password":"squidlover69",
+			"host":"localhost",
+			"port":5433,
+			"poolSize": 30,
+			"idle_timeout":600000,
+			"max_life_time": 900000
+		},
+		"garfield": {
+			"database":"garfield", 
+			"user":"postgres",
+			"password":"squidlover69",
+			"host":"localhost",
+			"port":5433,
+			"poolSize": 30,
+			"idle_timeout":600000,
+			"max_life_time": 900000
+		}
+	}
+	
+}
