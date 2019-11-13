@@ -24,6 +24,10 @@ public class FSMIDAO {
 		this.logger = logger;
 		this.db = db;
 	}
+	
+	public void registerUpdates() {
+		
+	}
 
 	public Document createDocument(Department department, int numberOfPages, SolutionType solutionType, String comment, DocumentType documentType, boolean hasFile, boolean hasBarcode, String submitter, boolean earlyDocumentEligible, boolean depositReturnEligible) {
 		try (Connection conn = db.getConnection();

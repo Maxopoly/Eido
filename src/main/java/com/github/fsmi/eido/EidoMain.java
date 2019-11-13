@@ -5,6 +5,8 @@ import java.sql.SQLException;
 import org.apache.logging.log4j.LogManager;
 import org.apache.logging.log4j.Logger;
 
+import com.github.fsmi.eido.database.DBMigrationHandler;
+import com.github.fsmi.eido.database.FSMIDAO;
 import com.github.fsmi.eido.handler.CommandHandler;
 import com.github.fsmi.eido.handler.TomcatHandler;
 
@@ -14,6 +16,8 @@ public class EidoMain {
 	private static EidoConfig config;
 	private static CommandHandler commandHandler;
 	private static TomcatHandler tomcatHandler;
+	private static DBMigrationHandler dbMigrationHandler;
+	private static FSMIDAO fsmiDao;
 
 	public static void main(String[] args) {
 		logger = LogManager.getLogger("Main");
@@ -22,6 +26,13 @@ public class EidoMain {
 			config = new EidoConfig(logger);
 		} catch (IllegalArgumentException e) {
 			logger.error("Failed to parse config, shutting down");
+			return;
+		}
+		dbMigrationHandler = new DBMigrationHandler(config.getFsmiDBConnection(), logger);
+		fsmiDao = new FSMIDAO(logger, config.getFsmiDBConnection());
+		fsmiDao.registerUpdates();
+		if (!dbMigrationHandler.migrateAll()) {
+			logger.error("Failed to update database, shutting down");
 			return;
 		}
 		commandHandler = new CommandHandler(logger);
@@ -49,8 +60,16 @@ public class EidoMain {
 		return logger;
 	}
 
+	public static DBMigrationHandler getDBMigrationHandler() {
+		return dbMigrationHandler;
+	}
+
 	public static EidoConfig getConfig() {
 		return config;
+	}
+
+	public static FSMIDAO getFSMIDao() {
+		return fsmiDao;
 	}
 
 }

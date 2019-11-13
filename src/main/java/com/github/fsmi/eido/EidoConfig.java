@@ -114,9 +114,8 @@ public class EidoConfig {
 		long idleTimeout = json.optLong("idle_timeout", 600_000L);
 		long maxLifeTime = json.optLong("max_life_time", 900_000L);
 		String database = json.optString("database", defaultDbName);
-		DBConnection dbConnection = new DBConnection(logger, user, password, host, port, database, poolSize,
+		return new DBConnection(logger, user, password, host, port, database, poolSize,
 				connectionTimeout, idleTimeout, maxLifeTime);
-		return dbConnection;
 	}
 	
 	/**
