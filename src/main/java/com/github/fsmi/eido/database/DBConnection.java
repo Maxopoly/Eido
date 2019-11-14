@@ -10,7 +10,8 @@ import com.zaxxer.hikari.HikariConfig;
 import com.zaxxer.hikari.HikariDataSource;
 
 /**
- * Wrapper for a hikari database connection, which allows easily retrieving single connections from the pool
+ * Wrapper for a hikari database connection, which allows easily retrieving
+ * single connections from the pool
  *
  */
 public class DBConnection {
@@ -18,9 +19,13 @@ public class DBConnection {
 	private HikariDataSource datasource;
 
 	public DBConnection(Logger logger, String user, String password, String host, int port, String database,
-			int poolSize, long connectionTimeout, long idleTimeout, long maxLifetime) {
+			String schema, int poolSize, long connectionTimeout, long idleTimeout, long maxLifetime) {
 		HikariConfig config = new HikariConfig();
-		config.setJdbcUrl("jdbc:postgresql://" + host + ":" + port + "/" + database);
+		String jdbcUrl = String.format("jdbc:postgresql://%s:%d/%s", host, port, database);
+		if (schema != null) {
+			jdbcUrl += String.format("?currentSchema=%s", schema);
+		}
+		config.setJdbcUrl(jdbcUrl);
 		config.setConnectionTimeout(connectionTimeout);
 		config.setIdleTimeout(idleTimeout);
 		config.setMaxLifetime(maxLifetime);

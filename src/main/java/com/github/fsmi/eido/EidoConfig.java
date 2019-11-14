@@ -108,13 +108,14 @@ public class EidoConfig {
 		String user = json.optString("user", "postgres");
 		String password = json.optString("password", null);
 		String host = json.optString("host", "localhost");
+		String schema = json.optString("schema", null);
 		int port = json.optInt("port", 5433);
 		int poolSize = json.optInt("poolSize", 30);
 		long connectionTimeout = json.optLong("connection_timeout", 10_000L);
 		long idleTimeout = json.optLong("idle_timeout", 600_000L);
 		long maxLifeTime = json.optLong("max_life_time", 900_000L);
 		String database = json.optString("database", defaultDbName);
-		return new DBConnection(logger, user, password, host, port, database, poolSize,
+		return new DBConnection(logger, user, password, host, port, database, schema,  poolSize,
 				connectionTimeout, idleTimeout, maxLifeTime);
 	}
 	
