@@ -17,9 +17,9 @@ public final class DBMigration {
 	/**
 	 * Access point for any changes made to the database structure. Registered
 	 * migrations will be executed in ascending id order and only if no update with
-	 * an id bigger than them has ever completed successfully. Once a migration has
-	 * run successfully, it can thus never run again. Migration ids may be at
-	 * minimum 1 and no migrations may share the same id.
+	 * an id bigger than them has ever completed successfully for the same migration
+	 * key. Once a migration has run successfully, it can thus never run again.
+	 * Migration ids may be at minimum 1 and no migrations may share the same id.
 	 * 
 	 * When running the migration, first all of the given queries will be executed.
 	 * The migration will fail and cancel if any errors occur when executing these.
@@ -27,13 +27,15 @@ public final class DBMigration {
 	 * may indicate whether its updating efforts were successful through its return
 	 * value. The migration is only considered successful if it returns true
 	 * 
-	 * @param db         Database connection to run the updating efforts on
-	 * @param id         Unique identifiying id for this migration, which will also
-	 *                   determine the order in which updates are executed
-	 * @param executable Callable to run optionally after the queries
-	 * @param queries    Queries to run at the beginning of the migration
+	 * @param db           Database connection to run the updating efforts on
+	 * @param migrationKey Key unique to this classes migration cycle
+	 * @param id           Unique identifiying id for this migration, which will
+	 *                     also determine the order in which updates are executed
+	 * @param executable   Callable to run optionally after the queries
+	 * @param queries      Queries to run at the beginning of the migration
 	 */
-	public static void createMigration(DBConnection db, int id, Callable<Boolean> executable, String... queries) {
+	public static void createMigration(DBConnection db, String migrationKey, int id, Callable<Boolean> executable,
+			String... queries) {
 		if (executable == null && queries.length == 0) {
 			throw new IllegalArgumentException(String.format("Can not register empty migration with id %d", id));
 		}
@@ -48,27 +50,28 @@ public final class DBMigration {
 	/**
 	 * Access point for any changes made to the database structure. Registered
 	 * migrations will be executed in ascending id order and only if no update with
-	 * an id bigger than them has ever completed successfully. Once a migration has
-	 * run successfully, it can thus never run again. Migration ids may be at
-	 * minimum 1 and no migrations may share the same id.
+	 * an id bigger than them has ever completed successfully for the same migration
+	 * key. Once a migration has run successfully, it can thus never run again.
+	 * Migration ids may be at minimum 1 and no migrations may share the same id.
 	 * 
 	 * When running the migration, all of the given queries will be executed. The
 	 * migration is only considered successful if all of these go through without
 	 * any exceptions
 	 * 
-	 * @param db      Database connection to run the updating efforts on
-	 * @param id      Unique identifiying id for this migration, which will also
-	 *                determine the order in which updates are executed
-	 * @param queries Queries to run as part of the migration
+	 * @param db           Database connection to run the updating efforts on
+	 * @param migrationKey Key unique to this classes migration cycle
+	 * @param id           Unique identifiying id for this migration, which will
+	 *                     also determine the order in which updates are executed
+	 * @param queries      Queries to run as part of the migration
 	 */
-	public static void createMigration(DBConnection db, int id, String query, String... queries) {
+	public static void createMigration(DBConnection db, String migrationKey, int id, String query, String... queries) {
 		// add single element to front of array
 		String[] allQueries = new String[queries.length + 1];
 		allQueries[0] = query;
 		for (int i = 1; i < allQueries.length; i++) {
 			allQueries[i] = queries[i - 1];
 		}
-		createMigration(db, id, (Callable<Boolean>) null, allQueries);
+		createMigration(db, migrationKey, id, (Callable<Boolean>) null, allQueries);
 	}
 
 	private final int id;

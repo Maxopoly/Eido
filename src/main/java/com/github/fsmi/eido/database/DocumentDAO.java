@@ -15,28 +15,28 @@ import com.github.fsmi.eido.model.documents.Document;
 import com.github.fsmi.eido.model.documents.DocumentType;
 import com.github.fsmi.eido.model.documents.SolutionType;
 
-public class DocumentDAO {
-
-	private DBConnection db;
-	private Logger logger;
+public class DocumentDAO extends AbstractDAO {
 
 	public DocumentDAO(Logger logger, DBConnection db) {
-		this.logger = logger;
-		this.db = db;
+		super(logger, db, "documents");
 	}
 
-	public void registerUpdates() {
+	@Override
+	public void registerMigrations() {
 		// creates old odie db structure
-		DBMigration.createMigration(db, 1, "CREATE TABLE IF NOT EXISTS documents(id serial NOT NULL, "
-				+ "department department NOT NULL, date date NOT NULL," + "number_of_pages integer NOT NULL DEFAULT 0,"
-				+ "solution solution,comment varchar NOT NULL DEFAULT ''," + "document_type document_type NOT NULL,"
-				+ "has_file boolean NOT NULL DEFAULT false, has_barcode boolean NOT NULL DEFAULT false,"
-				+ "validation_time timestamp with time zone, submitted_by character varying,"
-				+ "legacy_id integer, early_document_eligible boolean NOT NULL DEFAULT false,"
-				+ "deposit_return_eligible boolean NOT NULL DEFAULT false, "
-				+ "CONSTRAINT documents_pkey PRIMARY KEY (id))",
 
-				"CREATE TABLE IF NOT EXISTS examinants(id serial NOT NULL,name character varying NOT NULL,"
+		// TODO custom data types
+		DBMigration.createMigration(db, migrationID, 1,
+				"CREATE TABLE IF NOT EXISTS documents(id serial NOT NULL, department department NOT NULL, date date NOT NULL,"
+						+ "number_of_pages integer NOT NULL DEFAULT 0,"
+						+ "solution solution,comment varchar NOT NULL DEFAULT '',document_type document_type NOT NULL,"
+						+ "has_file boolean NOT NULL DEFAULT false, has_barcode boolean NOT NULL DEFAULT false,"
+						+ "validation_time timestamp with time zone, submitted_by character varying,"
+						+ "legacy_id integer, early_document_eligible boolean NOT NULL DEFAULT false,"
+						+ "deposit_return_eligible boolean NOT NULL DEFAULT false, "
+						+ "CONSTRAINT documents_pkey PRIMARY KEY (id))",
+
+				"CREATE TABLE IF NOT EXISTS examinants(id serial NOT NULL,name varchar NOT NULL,"
 						+ "validated boolean NOT NULL,CONSTRAINT examinants_pkey PRIMARY KEY (id))",
 
 				"CREATE TABLE IF NOT EXISTS document_examinants(document_id integer NOT NULL,"
@@ -68,27 +68,27 @@ public class DocumentDAO {
 						+ "MATCH SIMPLEON UPDATE NO ACTION ON DELETE CASCADE)",
 
 				"CREATE TABLE IF NOT EXISTS folder_examinants(folder_id integer NOT NULL,"
-				+ "examinant_id integer NOT NULL,CONSTRAINT folder_examinants_examinant_id_fkey "
-				+ "FOREIGN KEY (examinant_id)REFERENCES examinants (id) MATCH SIMPLEON "
-				+ "UPDATE NO ACTION ON DELETE CASCADE,CONSTRAINT folder_examinants_folder_id_fkey "
-				+ "FOREIGN KEY (folder_id)REFERENCES folders (id) MATCH SIMPLEON UPDATE NO ACTION "
-				+ "ON DELETE CASCADE)",
-				
+						+ "examinant_id integer NOT NULL,CONSTRAINT folder_examinants_examinant_id_fkey "
+						+ "FOREIGN KEY (examinant_id)REFERENCES examinants (id) MATCH SIMPLEON "
+						+ "UPDATE NO ACTION ON DELETE CASCADE,CONSTRAINT folder_examinants_folder_id_fkey "
+						+ "FOREIGN KEY (folder_id)REFERENCES folders (id) MATCH SIMPLEON UPDATE NO ACTION "
+						+ "ON DELETE CASCADE)",
+
 				"CREATE TABLE IF NOT EXISTS lectures(id serial NOT NULL,name varchar NOT NULL,aliases varchar[] "
-				+ "NOT NULL DEFAULT '{}',comment varchar NOT NULL DEFAULT '',validated boolean NOT NULL,"
-				+ "CONSTRAINT lectures_pkey PRIMARY KEY (id))",
-				
+						+ "NOT NULL DEFAULT '{}',comment varchar NOT NULL DEFAULT '',validated boolean NOT NULL,"
+						+ "CONSTRAINT lectures_pkey PRIMARY KEY (id))",
+
 				"CREATE TABLE IF NOT EXISTS lecture_docs(lecture_id integer NOT NULL,document_id integer NOT NULL,"
-				+ "CONSTRAINT lecture_docs_pkey PRIMARY KEY (lecture_id, document_id),"
-				+ "CONSTRAINT lecture_docs_document_id_fkey FOREIGN KEY (document_id)REFERENCES documents (id) "
-				+ "MATCH SIMPLEON UPDATE NO ACTION ON DELETE CASCADE,CONSTRAINT lecture_docs_lecture_id_fkey "
-				+ "FOREIGN KEY (lecture_id)REFERENCES lectures (id) MATCH SIMPLEON UPDATE NO ACTION ON DELETE CASCADE)",
-				
+						+ "CONSTRAINT lecture_docs_pkey PRIMARY KEY (lecture_id, document_id),"
+						+ "CONSTRAINT lecture_docs_document_id_fkey FOREIGN KEY (document_id)REFERENCES documents (id) "
+						+ "MATCH SIMPLEON UPDATE NO ACTION ON DELETE CASCADE,CONSTRAINT lecture_docs_lecture_id_fkey "
+						+ "FOREIGN KEY (lecture_id)REFERENCES lectures (id) MATCH SIMPLEON UPDATE NO ACTION ON DELETE CASCADE)",
+
 				"CREATE TABLE IF NOT EXISTS folder_lectures(folder_id integer NOT NULL,lecture_id integer NOT NULL,"
-				+ "CONSTRAINT folder_lectures_pkey PRIMARY KEY (folder_id, lecture_id),"
-				+ "CONSTRAINT folder_lectures_folder_id_fkey FOREIGN KEY (folder_id)REFERENCES folders (id) "
-				+ "MATCH SIMPLEON UPDATE NO ACTION ON DELETE CASCADE,CONSTRAINT folder_lectures_lecture_id_fkey "
-				+ "FOREIGN KEY (lecture_id)REFERENCES lectures (id) MATCH SIMPLEON UPDATE NO ACTION ON DELETE CASCADE)"
+						+ "CONSTRAINT folder_lectures_pkey PRIMARY KEY (folder_id, lecture_id),"
+						+ "CONSTRAINT folder_lectures_folder_id_fkey FOREIGN KEY (folder_id)REFERENCES folders (id) "
+						+ "MATCH SIMPLEON UPDATE NO ACTION ON DELETE CASCADE,CONSTRAINT folder_lectures_lecture_id_fkey "
+						+ "FOREIGN KEY (lecture_id)REFERENCES lectures (id) MATCH SIMPLEON UPDATE NO ACTION ON DELETE CASCADE)"
 
 		);
 	}

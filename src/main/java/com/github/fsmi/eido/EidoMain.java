@@ -30,7 +30,7 @@ public class EidoMain {
 		}
 		dbMigrationHandler = new DBMigrationHandler(config.getFsmiDBConnection(), logger);
 		fsmiDao = new DocumentDAO(logger, config.getFsmiDBConnection());
-		fsmiDao.registerUpdates();
+		fsmiDao.registerMigrations();
 		if (!dbMigrationHandler.migrateAll()) {
 			logger.error("Failed to update database, shutting down");
 			return;

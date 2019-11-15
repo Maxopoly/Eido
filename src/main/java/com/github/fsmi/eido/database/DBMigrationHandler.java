@@ -31,7 +31,8 @@ public class DBMigrationHandler {
 	private int loadCurrentVersion() {
 		try (Connection conn = db.getConnection();
 				PreparedStatement ps = conn.prepareStatement("create table if not exists eido_version"
-						+ "(id int not null primary key, done_when timestamp not null default now()")) {
+						+ "(id int not null primary key, name varchar(255) not null, "
+						+ "done_when timestamp not null default now()")) {
 			ps.execute();
 		} catch (SQLException e) {
 			logger.error("Unable to create versioning table", e);
@@ -76,7 +77,7 @@ public class DBMigrationHandler {
 
 	private void insertUpdateExecuted(int id) {
 		try (Connection conn = db.getConnection();
-				PreparedStatement ps = conn.prepareStatement("insert into eido_version (id) values(?);")) {
+				PreparedStatement ps = conn.prepareStatement("insert into eido_version (id, name) values(?);")) {
 			ps.setInt(1, id);
 			ps.execute();
 		} catch (SQLException e) {
