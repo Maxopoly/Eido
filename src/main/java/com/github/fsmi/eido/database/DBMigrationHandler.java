@@ -28,7 +28,7 @@ public class DBMigrationHandler {
 		this.migrations = new TreeSet<>();
 	}
 
-	private int loadCurrentVersion() {
+	private int loadCurrentVersion(String name) {
 		try (Connection conn = db.getConnection();
 				PreparedStatement ps = conn.prepareStatement("create table if not exists eido_version"
 						+ "(id int not null primary key, name varchar(255) not null, "
@@ -39,12 +39,14 @@ public class DBMigrationHandler {
 			return -1;
 		}
 		try (Connection conn = db.getConnection();
-				PreparedStatement ps = conn.prepareStatement("select max(id) from eido_version;");
-				ResultSet rs = ps.executeQuery()) {
-			if (!rs.next()) {
-				return 0;
+				PreparedStatement ps = conn.prepareStatement("select max(id) from eido_version where name=?;")) {
+			ps.setString(1, name);
+			try (ResultSet rs = ps.executeQuery()) {
+				if (!rs.next()) {
+					return 0;
+				}
+				return rs.getInt(1);
 			}
-			return rs.getInt(1);
 		} catch (SQLException e) {
 			logger.error("Unable to retrieve current version", e);
 			return -1;
@@ -57,11 +59,8 @@ public class DBMigrationHandler {
 	 * @return True if everything worked out fine, false if errors occured
 	 */
 	public boolean migrateAll() {
-		int currentVersion = loadCurrentVersion();
-		if (currentVersion == -1) {
-			return false;
-		}
 		for (DBMigration migration : migrations) {
+			int currentVersion = loadCurrentVersion(migration.getName());
 			if (migration.getID() <= currentVersion) {
 				continue;
 			}
@@ -69,16 +68,16 @@ public class DBMigrationHandler {
 				logger.error(String.format("Failed to execute migration %s", migration));
 				return false;
 			}
-			currentVersion = migration.getID();
-			insertUpdateExecuted(currentVersion);
+			insertUpdateExecuted(migration.getID(), migration.getName());
 		}
 		return true;
 	}
 
-	private void insertUpdateExecuted(int id) {
+	private void insertUpdateExecuted(int id, String name) {
 		try (Connection conn = db.getConnection();
-				PreparedStatement ps = conn.prepareStatement("insert into eido_version (id, name) values(?);")) {
+				PreparedStatement ps = conn.prepareStatement("insert into eido_version (id, name) values(?,?);")) {
 			ps.setInt(1, id);
+			ps.setString(2, name);
 			ps.execute();
 		} catch (SQLException e) {
 			logger.error("Failed to insert executed database update", e);

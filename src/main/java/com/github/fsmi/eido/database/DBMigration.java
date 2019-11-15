@@ -43,7 +43,7 @@ public final class DBMigration {
 			throw new IllegalArgumentException(String.format("Migration with id %d was already registered", id));
 		}
 		usedIds.add(id);
-		DBMigration migration = new DBMigration(db, id, executable, queries);
+		DBMigration migration = new DBMigration(db, id, migrationKey, executable, queries);
 		EidoMain.getDBMigrationHandler().registerMigration(migration);
 	}
 
@@ -75,17 +75,19 @@ public final class DBMigration {
 	}
 
 	private final int id;
+	private final String name;
 	private Callable<Boolean> executable;
 	private String[] queries;
 	private DBConnection db;
 
-	private DBMigration(DBConnection db, int id, Callable<Boolean> executable, String[] queries) {
-		Guard.nullCheck(db);
+	private DBMigration(DBConnection db, int id, String name, Callable<Boolean> executable, String[] queries) {
+		Guard.nullCheck(db, name);
 		if (id <= 0) {
 			throw new IllegalArgumentException("Migration id must be bigger than 0");
 		}
 		this.db = db;
 		this.id = id;
+		this.name = name;
 		this.executable = executable;
 		this.queries = queries;
 	}
@@ -110,8 +112,18 @@ public final class DBMigration {
 		return true;
 	}
 
+	/**
+	 * @return ID based on which the order in which this migration is applied is determined
+	 */
 	public int getID() {
 		return id;
+	}
+	
+	/**
+	 * @return Name of the database section this migration is for
+	 */
+	public String getName() {
+		return name;
 	}
 
 	public int compareTo(DBMigration otherMigration) {
