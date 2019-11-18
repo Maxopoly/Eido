@@ -4,6 +4,7 @@ import java.sql.SQLException;
 
 import org.apache.logging.log4j.LogManager;
 import org.apache.logging.log4j.Logger;
+import org.springframework.boot.SpringApplication;
 
 import com.github.fsmi.eido.database.DBMigrationHandler;
 import com.github.fsmi.eido.database.DocumentDAO;
@@ -28,17 +29,25 @@ public class EidoMain {
 			logger.error("Failed to parse config, shutting down");
 			return;
 		}
-		dbMigrationHandler = new DBMigrationHandler(config.getFsmiDBConnection(), logger);
+		/*dbMigrationHandler = new DBMigrationHandler(config.getFsmiDBConnection(), logger);
 		fsmiDao = new DocumentDAO(logger, config.getFsmiDBConnection());
 		fsmiDao.registerMigrations();
 		if (!dbMigrationHandler.migrateAll()) {
 			logger.error("Failed to update database, shutting down");
 			return;
 		}
+		*/
 		commandHandler = new CommandHandler(logger);
-		tomcatHandler = new TomcatHandler(logger, config);
-		new Thread(commandHandler::beginReading).start();
-		tomcatHandler.startWebServer();
+		System.out.println("jkljklj");
+		SpringApplication.run(SpringBootLauncher.class, args);
+		System.out.println("jkljklj");
+		//tomcatHandler = new TomcatHandler(logger, config);
+		//new Thread(commandHandler::beginReading).start();
+		//tomcatHandler.startWebServer();
+		commandHandler.beginReading();
+		while(1 != 2) {
+			
+		}
 		// new Thread(tomcatHandler::startWebServer).start();
 	}
 

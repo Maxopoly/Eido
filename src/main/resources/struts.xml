@@ -1,0 +1,38 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<!DOCTYPE struts PUBLIC
+    "-//Apache Software Foundation//DTD Struts Configuration 2.5//EN"
+    "http://struts.apache.org/dtds/struts-2.5.dtd">
+ 
+<struts>
+<constant name="struts.devMode" value="true"/>
+
+<package name="basicStruts2" extends="struts-default">
+
+        <action name="hello" class="com.github.fsmi.eido.tomcat.HelloAction" method="execute">
+            <result name="success">/hello.jsp</result>
+        </action>
+
+    </package>
+
+    <package name="documentselection" extends="struts-default">
+        <action name="calculateSumAction" class="com.github.fsmi.eido.tomcat.SumAction"
+            method="calculate">
+            <result name="success">/result.jsp</result>
+            <result name="input">/input.jsp</result>
+        </action>
+    </package>
+    <package name="eido" extends="struts-default">
+        <action name="calculateSumAction" class="com.github.fsmi.eido.tomcat.SumAction"
+            method="calculate">
+            <result name="success">/result.jsp</result>
+            <result name="input">/input.jsp</result>
+        </action>
+    </package>
+    <package name="/eido" extends="struts-default">
+        <action name="calculateSumAction" class="com.github.fsmi.eido.tomcat.SumAction"
+            method="calculate">
+            <result name="success">/result.jsp</result>
+            <result name="input">/input.jsp</result>
+        </action>
+    </package>
+</struts>

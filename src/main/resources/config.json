@@ -11,7 +11,7 @@
 			"user":"postgres",
 			"password":"squidlover69",
 			"host":"localhost",
-			"port":5433,
+			"port":5432,
 			"poolSize": 30,
 			"idle_timeout":600000,
 			"max_life_time": 900000
@@ -21,7 +21,7 @@
 			"user":"postgres",
 			"password":"squidlover69",
 			"host":"localhost",
-			"port":5433,
+			"port":5432,
 			"poolSize": 30,
 			"idle_timeout":600000,
 			"max_life_time": 900000

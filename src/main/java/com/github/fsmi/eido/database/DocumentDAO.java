@@ -25,8 +25,12 @@ public class DocumentDAO extends AbstractDAO {
 	public void registerMigrations() {
 		// creates old odie db structure
 
-		// TODO custom data types
 		DBMigration.createMigration(db, migrationID, 1,
+				// custom data types
+				"CREATE TYPE department AS ENUM('mathematics', 'computer science', 'other');",
+				"CREATE TYPE document_type AS ENUM('oral', 'written', 'oral reexam', 'mock exam');",
+				"CREATE TYPE solution AS ENUM('official', 'inofficial', 'none');",
+				// Single documents
 				"CREATE TABLE IF NOT EXISTS documents(id serial NOT NULL, department department NOT NULL, date date NOT NULL,"
 						+ "number_of_pages integer NOT NULL DEFAULT 0,"
 						+ "solution solution,comment varchar NOT NULL DEFAULT '',document_type document_type NOT NULL,"
@@ -35,62 +39,37 @@ public class DocumentDAO extends AbstractDAO {
 						+ "legacy_id integer, early_document_eligible boolean NOT NULL DEFAULT false,"
 						+ "deposit_return_eligible boolean NOT NULL DEFAULT false, "
 						+ "CONSTRAINT documents_pkey PRIMARY KEY (id))",
-
+				// the people holding the lectures
 				"CREATE TABLE IF NOT EXISTS examinants(id serial NOT NULL,name varchar NOT NULL,"
 						+ "validated boolean NOT NULL,CONSTRAINT examinants_pkey PRIMARY KEY (id))",
-
+				// n to n mapping of lectures and examinants. An examinant may hold multiple
+				// lectures and one lecture may be held by multiple examinants
 				"CREATE TABLE IF NOT EXISTS document_examinants(document_id integer NOT NULL,"
 						+ "examinant_id integer NOT NULL,CONSTRAINT document_examinants_document_id_fkey "
 						+ "FOREIGN KEY (document_id)REFERENCES documents.documents (id) MATCH SIMPLEON UPDATE NO ACTION ON DELETE CASCADE,"
 						+ "CONSTRAINT document_examinants_examinant_id_fkey "
 						+ "FOREIGN KEY (examinant_id)REFERENCES documents.examinants (id) MATCH SIMPLEON "
 						+ "UPDATE NO ACTION ON DELETE CASCADE)",
-
+				// Money that has been given to us and may be returned eventually. by_user
+				// describes the Fachschaftler who took the deposit in
 				"CREATE TABLE IF NOT EXISTS deposits(id serial NOT NULL,price integer NOT NULL,name varchar NOT NULL,"
 						+ "by_user varchar NOT NULL,date timestamp with time zone NOT NULL DEFAULT now(),CONSTRAINT deposits_pkey PRIMARY KEY (id))",
-
+				// Single lectures
+				"CREATE TABLE IF NOT EXISTS lectures(id serial NOT NULL,name varchar NOT NULL,aliases varchar[] "
+						+ "NOT NULL DEFAULT '{}',comment varchar NOT NULL DEFAULT '',validated boolean NOT NULL,"
+						+ "CONSTRAINT lectures_pkey PRIMARY KEY (id))",
 				"CREATE TABLE IF NOT EXISTS deposit_lectures(deposit_id integer NOT NULL,lecture_id integer NOT NULL,CONSTRAINT deposit_lectures_deposit_id_fkey "
 						+ "FOREIGN KEY (deposit_id)REFERENCES deposits (id) MATCH SIMPLEON UPDATE NO ACTION ON DELETE CASCADE,"
 						+ "CONSTRAINT deposit_lectures_lecture_id_fkey FOREIGN KEY (lecture_id)REFERENCES lectures (id) "
 						+ "MATCH SIMPLEON UPDATE NO ACTION ON DELETE CASCADE)",
-
-				// Odie previously had a foreign key for garfield.locations for the locations in
-				// this table, which was rather weird data structure wise and couldnt be
-				// properly done here as we only work on a single schema, so we did not include
-				// it in this creation statement. Handling of this foreign key is addressed in
-				// migrations further down
-				"CREATE TABLE IF NOT EXISTS folders(id serial NOT NULL,name varchar NOT NULL,location_id integer NOT NULL,"
-						+ "document_type document_type NOT NULL, CONSTRAINT folders_pkey PRIMARY KEY (id))",
-
-				"CREATE TABLE IF NOT EXISTS folder_docs(folder_id integer NOT NULL,document_id integer NOT NULL,CONSTRAINT folder_docs_document_id_fkey "
-						+ "FOREIGN KEY (document_id)REFERENCES documents (id) MATCH SIMPLEON UPDATE NO ACTION ON DELETE CASCADE,"
-						+ "CONSTRAINT folder_docs_folder_id_fkey FOREIGN KEY (folder_id)REFERENCES folders (id) "
-						+ "MATCH SIMPLEON UPDATE NO ACTION ON DELETE CASCADE)",
-
-				"CREATE TABLE IF NOT EXISTS folder_examinants(folder_id integer NOT NULL,"
-						+ "examinant_id integer NOT NULL,CONSTRAINT folder_examinants_examinant_id_fkey "
-						+ "FOREIGN KEY (examinant_id)REFERENCES examinants (id) MATCH SIMPLEON "
-						+ "UPDATE NO ACTION ON DELETE CASCADE,CONSTRAINT folder_examinants_folder_id_fkey "
-						+ "FOREIGN KEY (folder_id)REFERENCES folders (id) MATCH SIMPLEON UPDATE NO ACTION "
-						+ "ON DELETE CASCADE)",
-
-				"CREATE TABLE IF NOT EXISTS lectures(id serial NOT NULL,name varchar NOT NULL,aliases varchar[] "
-						+ "NOT NULL DEFAULT '{}',comment varchar NOT NULL DEFAULT '',validated boolean NOT NULL,"
-						+ "CONSTRAINT lectures_pkey PRIMARY KEY (id))",
-
+				// n to n mapping between lectures and documents. One document may contain data
+				// for multiple lectures (LA1 & LA2 for example) and one lecture may obviously
+				// have multiple documents
 				"CREATE TABLE IF NOT EXISTS lecture_docs(lecture_id integer NOT NULL,document_id integer NOT NULL,"
 						+ "CONSTRAINT lecture_docs_pkey PRIMARY KEY (lecture_id, document_id),"
 						+ "CONSTRAINT lecture_docs_document_id_fkey FOREIGN KEY (document_id)REFERENCES documents (id) "
 						+ "MATCH SIMPLEON UPDATE NO ACTION ON DELETE CASCADE,CONSTRAINT lecture_docs_lecture_id_fkey "
-						+ "FOREIGN KEY (lecture_id)REFERENCES lectures (id) MATCH SIMPLEON UPDATE NO ACTION ON DELETE CASCADE)",
-
-				"CREATE TABLE IF NOT EXISTS folder_lectures(folder_id integer NOT NULL,lecture_id integer NOT NULL,"
-						+ "CONSTRAINT folder_lectures_pkey PRIMARY KEY (folder_id, lecture_id),"
-						+ "CONSTRAINT folder_lectures_folder_id_fkey FOREIGN KEY (folder_id)REFERENCES folders (id) "
-						+ "MATCH SIMPLEON UPDATE NO ACTION ON DELETE CASCADE,CONSTRAINT folder_lectures_lecture_id_fkey "
-						+ "FOREIGN KEY (lecture_id)REFERENCES lectures (id) MATCH SIMPLEON UPDATE NO ACTION ON DELETE CASCADE)"
-
-		);
+						+ "FOREIGN KEY (lecture_id)REFERENCES lectures (id) MATCH SIMPLEON UPDATE NO ACTION ON DELETE CASCADE)");
 	}
 
 	public Document createDocument(Department department, int numberOfPages, SolutionType solutionType, String comment,

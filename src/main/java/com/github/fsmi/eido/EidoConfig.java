@@ -60,8 +60,8 @@ public class EidoConfig {
 		if (databaseJson == null) {
 			throw new IllegalArgumentException("No databases specified in config");
 		}
-		fsmiDbConnection = parseDatabase(config.getJSONObject("fsmi"),"fsmi");
-		garfieldDbConnection = parseDatabase(config.optJSONObject("garfield"), "garfield");
+		fsmiDbConnection = parseDatabase(databaseJson.optJSONObject("fsmi"),"fsmi");
+		garfieldDbConnection = parseDatabase(databaseJson.optJSONObject("garfield"), "garfield");
 		
 		
 		

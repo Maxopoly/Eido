@@ -1,5 +1,7 @@
 package com.github.fsmi.eido.model.documents;
 
+import org.apache.struts2.convention.annotation.Result;
+
 import com.github.fsmi.eido.util.Guard;
 
 public class Document {
@@ -34,7 +36,7 @@ public class Document {
 		this.submitter = submitter;
 		this.earlyDocumentEligible = earlyDocumentEligible;
 		this.depositReturnEligible = depositReturnEligible;
-	}
+	}	
 
 	/**
 	 * @return Can the student get the deposit back he paid buying this document
